@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta name="mobile-web-app-capable" content="yes"> <!-- Updated meta tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta charset="utf-8" />
+
+    <title>Yousif's Game Page</title>
+    <link rel="icon" type="image/x-icon" href="https://www.google.com/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #2f2f2f, #5c5c5c);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        header {
+            background: rgba(30, 144, 255, 0.9);
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .gm4html5_div_class {
+            margin: 20px;
+            position: relative;
+        }
+
+        canvas {
+            width: 90%; 
+            height: auto;
+            max-width: 100vh; 
+            image-rendering: auto; 
+            touch-action: none;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to Yousif's Game Page!</h1>
+        <p>Enjoy your game!</p>
+    </header>
+
+    <div class="gm4html5_div_class" id="gm4html5_div_id">
+        <canvas id="canvas" width="800" height="600">
+            <p>Your browser doesn't support HTML5 canvas.</p>
+        </canvas>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Yousif's Site. All rights reserved.</p>
+    </footer>
+
+    <script type="text/javascript" src="html5game/RetroBowl.js"></script>
+
+    <script>
+        // Declare canvas and context only once
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        window.addEventListener("load", function() {
+            resizeCanvas();
+
+            // Check if GameMaker_Init is defined
+            if (typeof GameMaker_Init === "function") {
+                GameMaker_Init(); // Initialize your game
+            } else {
+                console.error("GameMaker_Init function is not defined. Make sure RetroBowl.js is loaded correctly.");
+            }
+        });
+
+        // Resize canvas based on device pixel ratio for sharper rendering
+        function resizeCanvas() {
+            const scale = window.devicePixelRatio; 
+            canvas.width = 800 * scale; 
+            canvas.height = 600 * scale; 
+            ctx.scale(scale, scale); 
+        }
+
+        // Add click event listener to canvas
+        canvas.addEventListener("click", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            console.log("Canvas clicked at:", x, y);
+            if (typeof GameMaker_ClickHandler === "function") {
+                GameMaker_ClickHandler(x, y);
+            } else {
+                console.error("GameMaker_ClickHandler function is not defined.");
+            }
+        });
+
+        // Set up resize event
+        window.addEventListener("resize", resizeCanvas);
+    </script>
+</body>
+</html>
