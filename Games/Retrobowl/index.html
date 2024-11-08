@@ -75,26 +75,6 @@
             <script>
                 document.querySelector('canvas').width = window.innerWidth;
                 document.querySelector('canvas').height = window.innerHeight;
-
-                // Touch events
-                const canvas = document.getElementById('canvas');
-
-                canvas.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    let touch = e.touches[0];
-                    console.log('Touch start:', touch.pageX, touch.pageY);
-                }, false);
-
-                canvas.addEventListener('touchmove', function(e) {
-                    e.preventDefault();
-                    let touch = e.touches[0];
-                    console.log('Touch move:', touch.pageX, touch.pageY);
-                }, false);
-
-                canvas.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    console.log('Touch end');
-                }, false);
             </script>
         </div>
 
