@@ -86,23 +86,65 @@
         <script>
             const canvas = document.getElementById('canvas');
 
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchEndX = 0;
+            let touchEndY = 0;
+
+            const MIN_SWIPE_DISTANCE = 30; // Minimum distance to consider as swipe (in pixels)
+
+            // Touch start to simulate mouse down
             canvas.addEventListener('touchstart', function(event) {
-                // Prevent the default behavior to avoid scrolling or zooming
                 event.preventDefault();
-                console.log('Touch start detected');
-                // Add your custom code here to handle touch start
+                const touch = event.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
             }, false);
 
+            // Touch move to simulate mouse move
             canvas.addEventListener('touchmove', function(event) {
                 event.preventDefault();
-                console.log('Touch move detected');
-                // Add your custom code here to handle touch move
+                const touch = event.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
             }, false);
 
+            // Touch end to simulate mouse up and detect swipe
             canvas.addEventListener('touchend', function(event) {
                 event.preventDefault();
-                console.log('Touch end detected');
-                // Add your custom code here to handle touch end
+                const touch = event.changedTouches[0];
+                touchEndX = touch.clientX;
+                touchEndY = touch.clientY;
+
+                const mouseEvent = new MouseEvent('mouseup', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+
+                // Swipe detection logic
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+
+                // If swipe distance is significant, detect swipe direction
+                if (Math.abs(deltaX) > MIN_SWIPE_DISTANCE && Math.abs(deltaY) < MIN_SWIPE_DISTANCE) {
+                    if (deltaX > 0) {
+                        console.log('Swipe right detected');
+                        // Handle swipe right logic here
+                    } else {
+                        console.log('Swipe left detected');
+                        // Handle swipe left logic here
+                    }
+                }
             }, false);
         </script>
     </body>
