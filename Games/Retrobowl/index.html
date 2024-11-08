@@ -23,6 +23,7 @@
                       margin: 0px;
                       padding: 0px;
                       border: 0px;
+                      display: block;  /* Ensures no gaps around the canvas */
             }
             :-webkit-full-screen #canvas {
                  width: 100%;
@@ -72,10 +73,6 @@
             <canvas id="canvas">
                      <p>Your browser doesn't support HTML5 canvas.</p>
             </canvas>
-            <script>
-                document.querySelector('canvas').width = window.innerWidth;
-                document.querySelector('canvas').height = window.innerHeight;
-            </script>
         </div>
 
         <!-- Run the game code -->
@@ -85,6 +82,18 @@
         <!-- Touch support script -->
         <script>
             const canvas = document.getElementById('canvas');
+            
+            // Function to resize the canvas to fill the screen
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            // Resize canvas on window resize
+            window.addEventListener('resize', resizeCanvas);
+
+            // Set the initial size of the canvas
+            resizeCanvas();
 
             let touchStartX = 0;
             let touchStartY = 0;
@@ -94,9 +103,15 @@
 
             // Helper function to handle mouse events
             function dispatchMouseEvent(type, touch) {
+                const rect = canvas.getBoundingClientRect(); // Get the canvas position and size
+                const scaleX = canvas.width / rect.width; // Scale factor for X-axis
+                const scaleY = canvas.height / rect.height; // Scale factor for Y-axis
+                const clientX = (touch.clientX - rect.left) * scaleX; // Adjust touch X
+                const clientY = (touch.clientY - rect.top) * scaleY; // Adjust touch Y
+                
                 const mouseEvent = new MouseEvent(type, {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
+                    clientX: clientX,
+                    clientY: clientY
                 });
                 canvas.dispatchEvent(mouseEvent);
             }
