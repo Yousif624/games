@@ -9,60 +9,78 @@
         <meta charset="utf-8"/>
         <style>
             body {
-              background: #fff;  /* Change to white for better contrast */
-              color:#000;  /* Black text */
-              margin: 0px;
-              padding: 0px;
-              border: 0px;
-              overflow: hidden;
+                background: #fff;  /* White background */
+                color: #000;  /* Black text */
+                margin: 0;
+                padding: 0;
+                border: 0;
+                overflow: hidden;
             }
             canvas {
                 image-rendering: optimizeSpeed;
                 -webkit-interpolation-mode: nearest-neighbor;
                 -ms-touch-action: none;
-                margin: 0px;
-                padding: 0px;
-                border: 0px;
+                margin: 0;
+                padding: 0;
+                border: 0;
                 touch-action: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 1;
             }
             :-webkit-full-screen #canvas {
-                 width: 100%;
-                 height: 100%;
+                width: 100%;
+                height: 100%;
             }
         </style>
     </head>
+
     <body>
-        <div class="gm4html5_div_class" id="gm4html5_div_id">
+        <div id="gm4html5_div_id">
             <img src="html5game/splash.png" id="GM4HTML5_loadingscreen" alt="GameMaker:HTML5 loading screen" style="display:none;"/>
-            <!-- Create the canvas element the game draws to -->
+            
+            <!-- Canvas element the game renders to -->
             <canvas id="canvas">
                 <p>Your browser doesn't support HTML5 canvas.</p>
             </canvas>
+
             <script>
-                const canvas = document.querySelector('canvas');
+                // Set canvas size to fill the screen
+                const canvas = document.getElementById('canvas');
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
 
-                // Test drawing a red rectangle on the canvas
+                // Test drawing a red rectangle on the canvas (debugging step)
                 const ctx = canvas.getContext('2d');
                 ctx.fillStyle = 'red';
-                ctx.fillRect(100, 100, 200, 200); // Test canvas rendering
+                ctx.fillRect(100, 100, 200, 200); // Test rendering
 
-                // Check if touch is supported and log
-                if ('ontouchstart' in window) {
-                    console.log("Touch is supported!");
-                } else {
-                    console.log("Touch is NOT supported.");
-                }
+                // Handle touch events for mobile and touch laptops
+                canvas.addEventListener('touchstart', function(e) {
+                    console.log("Touch started");
+                    e.preventDefault(); // Prevent default touch actions (like scrolling)
+                });
+
+                canvas.addEventListener('touchmove', function(e) {
+                    console.log("Touch moved");
+                    e.preventDefault(); // Prevent default touch actions
+                });
+
+                canvas.addEventListener('touchend', function(e) {
+                    console.log("Touch ended");
+                    e.preventDefault(); // Prevent default touch actions
+                });
 
                 // Game initialization
                 window.onload = function() {
-                    GameMaker_Init();
+                    console.log("Game is loading...");
+                    GameMaker_Init();  // Initialize the game
                 };
             </script>
         </div>
 
-        <!-- Run the game code -->
+        <!-- Load the game script -->
         <script type="text/javascript" src="html5game/RetroBowl.js"></script>
     </body>
 </html>
