@@ -72,14 +72,21 @@
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
 
+                // Log to check if touch is supported
+                if ('ontouchstart' in window) {
+                    console.log("Touch is supported!");
+                } else {
+                    console.log("Touch is NOT supported.");
+                }
+
                 // Handle touch events for Chromebooks
                 canvas.addEventListener('touchstart', function(e) {
                     e.preventDefault();  // Prevent default touch behavior like scrolling
                     const touch = e.touches[0];
                     const touchX = touch.clientX;
                     const touchY = touch.clientY;
-                    // Handle touch start logic (use touchX and touchY)
                     console.log('Touch start at:', touchX, touchY);
+                    // Additional logic for touch start
                 });
 
                 canvas.addEventListener('touchmove', function(e) {
@@ -87,8 +94,8 @@
                     const touch = e.touches[0];
                     const touchX = touch.clientX;
                     const touchY = touch.clientY;
-                    // Handle touch move logic (use touchX and touchY)
                     console.log('Touch move at:', touchX, touchY);
+                    // Additional logic for touch move
                 });
 
                 canvas.addEventListener('touchend', function(e) {
@@ -96,30 +103,30 @@
                     const touch = e.changedTouches[0];
                     const touchX = touch.clientX;
                     const touchY = touch.clientY;
-                    // Handle touch end logic (use touchX and touchY)
                     console.log('Touch end at:', touchX, touchY);
+                    // Additional logic for touch end
                 });
 
                 // For mouse events (default for non-touch devices)
                 canvas.addEventListener('mousedown', function(e) {
                     const mouseX = e.clientX;
                     const mouseY = e.clientY;
-                    // Handle mouse click logic
                     console.log('Mouse down at:', mouseX, mouseY);
+                    // Additional logic for mouse down
                 });
 
                 canvas.addEventListener('mousemove', function(e) {
                     const mouseX = e.clientX;
                     const mouseY = e.clientY;
-                    // Handle mouse move logic
                     console.log('Mouse move at:', mouseX, mouseY);
+                    // Additional logic for mouse move
                 });
 
                 canvas.addEventListener('mouseup', function(e) {
                     const mouseX = e.clientX;
                     const mouseY = e.clientY;
-                    // Handle mouse up logic
                     console.log('Mouse up at:', mouseX, mouseY);
+                    // Additional logic for mouse up
                 });
             </script>
         </div>
