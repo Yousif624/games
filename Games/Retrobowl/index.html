@@ -1,78 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta http-equiv="pragma" content="no-cache"/>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta charset="utf-8"/>
-        <style>
-            body {
-                background: #fff; /* White background */
-                color: #000; /* Black text */
-                margin: 0;
-                padding: 0;
-                border: 0;
-                overflow: hidden;
-            }
-            canvas {
-                image-rendering: optimizeSpeed;
-                -webkit-interpolation-mode: nearest-neighbor;
-                -ms-touch-action: none;
-                margin: 0;
-                padding: 0;
-                border: 0;
-                touch-action: none;
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 1;
-            }
-        </style>
-    </head>
+<script>
+    const canvas = document.getElementById('canvas');
 
-    <body>
-        <div id="gm4html5_div_id">
-            <img src="html5game/splash.png" id="GM4HTML5_loadingscreen" alt="GameMaker:HTML5 loading screen" style="display:none;"/>
-            
-            <!-- Canvas element the game renders to -->
-            <canvas id="canvas">
-                <p>Your browser doesn't support HTML5 canvas.</p>
-            </canvas>
+    canvas.addEventListener('touchstart', function(event) {
+        // Prevent the default behavior to avoid scrolling or zooming
+        event.preventDefault();
+        console.log('Touch start detected');
+        // Add your custom code here to handle touch start
+    }, false);
 
-            <script>
-                // Set canvas size to fill the screen
-                const canvas = document.getElementById('canvas');
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+    canvas.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+        console.log('Touch move detected');
+        // Add your custom code here to handle touch move
+    }, false);
 
-                // Handle touch events for mobile and touch laptops
-                canvas.addEventListener('touchstart', function(e) {
-                    e.preventDefault(); // Prevent default touch actions (like scrolling)
-                });
-
-                canvas.addEventListener('touchmove', function(e) {
-                    e.preventDefault(); // Prevent default touch actions
-                });
-
-                canvas.addEventListener('touchend', function(e) {
-                    e.preventDefault(); // Prevent default touch actions
-                });
-
-                // Initialize the game after the window loads
-                window.onload = function() {
-                    console.log("Game is loading...");
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-
-                    // Initialize the game
-                    GameMaker_Init();
-                };
-            </script>
-        </div>
-
-        <!-- Load the game script -->
-        <script type="text/javascript" src="html5game/RetroBowl.js"></script>
-    </body>
-</html>
+    canvas.addEventListener('touchend', function(event) {
+        event.preventDefault();
+        console.log('Touch end detected');
+        // Add your custom code here to handle touch end
+    }, false);
+</script>
