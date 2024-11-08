@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.142.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.19.0/build/cannon-es.min.js"></script>
+    <div id="ui-container">
+        <div id="health-bar">
+            <label>Health: <span id="health-value">100</span></label>
+            <div id="health-progress"><div></div></div>
+        </div>
+        <div id="shield-bar">
+            <label>Shield: <span id="shield-value">100</span></label>
+            <div id="shield-progress"><div></div></div>
+        </div>
+        <div id="weapon-status">
+            <label>Weapon: <span id="weapon-status-text">No Weapon</span></label>
+        </div>
+    </div>
+    <script src="three.min.js"></script>
+    <script src="cannon.min.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
