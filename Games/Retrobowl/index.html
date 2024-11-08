@@ -67,35 +67,39 @@
                 <p>Your browser doesn't support HTML5 canvas.</p>
             </canvas>
             <script>
-                // Set canvas size to match window dimensions
                 const canvas = document.querySelector('canvas');
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
 
-                // Add touch event listeners
-                canvas.addEventListener('touchstart', handleTouchStart, false);
-                canvas.addEventListener('touchmove', handleTouchMove, false);
-                canvas.addEventListener('touchend', handleTouchEnd, false);
+                // Function to simulate mouse events from touch
+                function simulateMouseEvent(touchEvent, type) {
+                    const mouseEvent = new MouseEvent(type, {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        clientX: touchEvent.clientX,
+                        clientY: touchEvent.clientY
+                    });
+                    canvas.dispatchEvent(mouseEvent);
+                }
 
-                function handleTouchStart(event) {
+                // Touch event listeners
+                canvas.addEventListener('touchstart', function(event) {
                     event.preventDefault();
                     const touch = event.touches[0];
-                    console.log('Touch start:', touch.clientX, touch.clientY);
-                    // Handle game-specific touch start behavior here
-                }
+                    simulateMouseEvent(touch, 'mousedown');
+                }, false);
 
-                function handleTouchMove(event) {
+                canvas.addEventListener('touchmove', function(event) {
                     event.preventDefault();
                     const touch = event.touches[0];
-                    console.log('Touch move:', touch.clientX, touch.clientY);
-                    // Handle game-specific touch move behavior here
-                }
+                    simulateMouseEvent(touch, 'mousemove');
+                }, false);
 
-                function handleTouchEnd(event) {
+                canvas.addEventListener('touchend', function(event) {
                     event.preventDefault();
-                    console.log('Touch end');
-                    // Handle game-specific touch end behavior here
-                }
+                    simulateMouseEvent(event.changedTouches[0], 'mouseup');
+                }, false);
             </script>
         </div>
 
