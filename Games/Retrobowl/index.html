@@ -9,8 +9,8 @@
         <meta charset="utf-8"/>
         <style>
             body {
-                background: #fff;  /* White background */
-                color: #000;  /* Black text */
+                background: #fff; /* White background */
+                color: #000; /* Black text */
                 margin: 0;
                 padding: 0;
                 border: 0;
@@ -28,10 +28,6 @@
                 top: 0;
                 left: 0;
                 z-index: 1;
-            }
-            :-webkit-full-screen #canvas {
-                width: 100%;
-                height: 100%;
             }
         </style>
     </head>
@@ -51,31 +47,27 @@
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
 
-                // Test drawing a red rectangle on the canvas (debugging step)
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = 'red';
-                ctx.fillRect(100, 100, 200, 200); // Test rendering
-
                 // Handle touch events for mobile and touch laptops
                 canvas.addEventListener('touchstart', function(e) {
-                    console.log("Touch started");
                     e.preventDefault(); // Prevent default touch actions (like scrolling)
                 });
 
                 canvas.addEventListener('touchmove', function(e) {
-                    console.log("Touch moved");
                     e.preventDefault(); // Prevent default touch actions
                 });
 
                 canvas.addEventListener('touchend', function(e) {
-                    console.log("Touch ended");
                     e.preventDefault(); // Prevent default touch actions
                 });
 
-                // Game initialization
+                // Initialize the game after the window loads
                 window.onload = function() {
                     console.log("Game is loading...");
-                    GameMaker_Init();  // Initialize the game
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+                    // Initialize the game
+                    GameMaker_Init();
                 };
             </script>
         </div>
