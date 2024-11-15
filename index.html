@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Bowl Inspired Game</title>
+    <title>Football Game</title>
     <style>
         body, html {
             margin: 0;
@@ -75,16 +75,8 @@ let quarterback = {
     routeIndex: 0,
 };
 
-let receiver = {
-    x: 300,
-    y: 100,
-    width: 30,
-    height: 30,
-    speed: 4,
-    route: [{x: 500, y: 150}, {x: 600, y: 400}], // Example route points for receiver
-    routeIndex: 0,
-};
-
+let receivers = [];
+let defenders = [];
 let ball = {
     x: quarterback.x + 15,
     y: quarterback.y + 15,
@@ -99,13 +91,45 @@ let ball = {
 let score = 0;
 let level = 1;
 let gameOver = false;
-let defender = {
-    x: 200,
-    y: 300,
-    width: 30,
-    height: 30,
-    speed: 3,
-};
+
+// Initialize the players
+function initializePlayers() {
+    // Add 5 receivers
+    for (let i = 0; i < 5; i++) {
+        receivers.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            width: 30,
+            height: 30,
+            speed: 4,
+            route: generateRandomRoutes(20),
+            routeIndex: 0,
+        });
+    }
+
+    // Add 6 defenders
+    for (let i = 0; i < 6; i++) {
+        defenders.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            width: 30,
+            height: 30,
+            speed: 3,
+        });
+    }
+}
+
+// Generate random routes for players
+function generateRandomRoutes(numRoutes) {
+    const routes = [];
+    for (let i = 0; i < numRoutes; i++) {
+        routes.push({
+            x: Math.random() * canvas.width, // Random x coordinate
+            y: Math.random() * canvas.height, // Random y coordinate
+        });
+    }
+    return routes;
+}
 
 // Update the game state
 function updateGame() {
@@ -114,22 +138,26 @@ function updateGame() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw field (with updated design)
+    // Draw field
     drawField();
 
     // Move players
     movePlayerAlongRoute(quarterback);
-    movePlayerAlongRoute(receiver);
-    moveDefender();
+    receivers.forEach(receiver => movePlayerAlongRoute(receiver));
+    moveDefenders();
 
     // Draw quarterback
     ctx.drawImage(quarterbackImg, quarterback.x, quarterback.y, quarterback.width, quarterback.height);
 
-    // Draw receiver
-    ctx.drawImage(receiverImg, receiver.x, receiver.y, receiver.width, receiver.height);
+    // Draw receivers
+    receivers.forEach(receiver => {
+        ctx.drawImage(receiverImg, receiver.x, receiver.y, receiver.width, receiver.height);
+    });
 
-    // Draw defender
-    ctx.drawImage(defenderImg, defender.x, defender.y, defender.width, defender.height);
+    // Draw defenders
+    defenders.forEach(defender => {
+        ctx.drawImage(defenderImg, defender.x, defender.y, defender.width, defender.height);
+    });
 
     // Draw ball if thrown
     if (ball.isThrown) {
@@ -152,8 +180,8 @@ function updateGame() {
             if (Math.abs(ball.targetX - receiver.x) < receiver.width / 2 &&
                 Math.abs(ball.targetY - receiver.y) < receiver.height / 2) {
                 console.log("Caught!");
-                // Switch to controlling receiver after catch
                 quarterback.hasBall = false;
+                // Switch to the next receiver if caught
                 receiver.hasBall = true;
             }
         }
@@ -182,7 +210,7 @@ function drawField() {
     }
 }
 
-// Move player along their route (based on route points)
+// Move player along their route
 function movePlayerAlongRoute(playerObj) {
     if (playerObj.route.length > 0) {
         let target = playerObj.route[playerObj.routeIndex];
@@ -198,39 +226,39 @@ function movePlayerAlongRoute(playerObj) {
             playerObj.routeIndex++;
             if (playerObj.routeIndex >= playerObj.route.length) {
                 playerObj.routeIndex = 0; // Reset to start of route
+                playerObj.route = generateRandomRoutes(20); // Generate new routes once completed
             }
         }
     }
 }
 
-// Move defender to challenge the quarterback
-function moveDefender() {
-    let dx = quarterback.x - defender.x;
-    let dy = quarterback.y - defender.y;
-    let distance = Math.sqrt(dx * dx + dy * dy);
+// Move defenders to challenge the quarterback
+function moveDefenders() {
+    defenders.forEach(defender => {
+        let dx = quarterback.x - defender.x;
+        let dy = quarterback.y - defender.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance > 1) {
-        let angle = Math.atan2(dy, dx);
-        defender.x += Math.cos(angle) * defender.speed;
-        defender.y += Math.sin(angle) * defender.speed;
-    }
+        if (distance > 1) {
+            let angle = Math.atan2(dy, dx);
+            defender.x += Math.cos(angle) * defender.speed;
+            defender.y += Math.sin(angle) * defender.speed;
+        }
+    });
 }
 
-// Handle player input (movement and throwing)
+// Handle player input (throwing the ball)
 function handlePlayerInput(e) {
     if (gameOver) return;
 
-    // Throw the ball (triggered by spacebar)
     if (e.key === ' ' && quarterback.hasBall) {
-        // Throw ball to receiver's current position
         ball.isThrown = true;
-        ball.targetX = receiver.x + 15;
-        ball.targetY = receiver.y + 15;
-        console.log('Ball thrown to target');
+        ball.targetX = receivers[0].x + 15; // Target the first receiver
+        ball.targetY = receivers[0].y + 15;
     }
 }
 
-// Update the UI (score and level)
+// Update the UI
 function updateUI() {
     document.getElementById('score').textContent = 'Score: ' + score;
     document.getElementById('level').textContent = 'Level: ' + level;
@@ -239,7 +267,8 @@ function updateUI() {
 // Event listener for keyboard input
 window.addEventListener('keydown', handlePlayerInput);
 
-// Start the game
+// Initialize players and start the game
+initializePlayers();
 updateGame();
 
 </script>
