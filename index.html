@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Game</title>
+    <title>Retro Bowl Inspired Game</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             overflow: hidden;
-            background: #4caf50; /* Football field green */
         }
 
         canvas {
@@ -32,21 +31,6 @@
             color: red;
             font-size: 30px;
         }
-
-        .upgrade-button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #ff5722;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .upgrade-button:hover {
-            background-color: #e64a19;
-        }
-
     </style>
 </head>
 <body>
@@ -57,11 +41,6 @@
     <div id="score">Score: 0</div>
     <div id="level">Level: 1</div>
     <div id="game-over" class="game-over" style="display:none;">Game Over!</div>
-    <div id="upgrade-panel" style="display:none;">
-        <button class="upgrade-button" id="upgrade-speed">Upgrade Speed</button>
-        <button class="upgrade-button" id="upgrade-passing">Upgrade Passing</button>
-        <button class="upgrade-button" id="upgrade-running">Upgrade Running</button>
-    </div>
 </div>
 
 <script>
@@ -71,96 +50,62 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
-// Load player image
-const playerImg = new Image();
-playerImg.src = 'https://example.com/player_sprite.png'; // Replace with actual sprite image URL
+// Load player images
+const quarterbackImg = new Image();
+quarterbackImg.src = 'https://example.com/quarterback_sprite.png'; // Replace with actual image URL
 
-// Load ball image
+const receiverImg = new Image();
+receiverImg.src = 'https://example.com/receiver_sprite.png'; // Replace with actual image URL
+
+const defenderImg = new Image();
+defenderImg.src = 'https://example.com/defender_sprite.png'; // Replace with actual image URL
+
 const ballImg = new Image();
-ballImg.src = 'https://example.com/football_sprite.png'; // Replace with actual ball image URL
+ballImg.src = 'https://example.com/football_sprite.png'; // Replace with actual image URL
 
 // Game objects
-let player = {
+let quarterback = {
     x: 100,
     y: 300,
     width: 30,
     height: 30,
     speed: 5,
     hasBall: true,
-    stats: { speed: 5, passing: 5, running: 5 },
+    route: [],
+    routeIndex: 0,
 };
 
-let opponent = {
-    x: 600,
-    y: 300,
+let receiver = {
+    x: 300,
+    y: 100,
     width: 30,
     height: 30,
     speed: 4,
-    color: 'red',
-    stats: { speed: 4, defense: 4 },
+    route: [{x: 500, y: 150}, {x: 600, y: 400}], // Example route points for receiver
+    routeIndex: 0,
 };
 
 let ball = {
-    x: player.x + 15,
-    y: player.y + 15,
+    x: quarterback.x + 15,
+    y: quarterback.y + 15,
     radius: 10,
     color: 'yellow',
     isThrown: false,
+    targetX: 0,
+    targetY: 0,
 };
 
 // Game variables
 let score = 0;
 let level = 1;
 let gameOver = false;
-
-// Team Management Variables
-let team = {
-    players: [{ name: 'Player 1', speed: 5, passing: 5, running: 5 }],
-    upgrades: { speed: 10, passing: 10, running: 10 },
+let defender = {
+    x: 200,
+    y: 300,
+    width: 30,
+    height: 30,
+    speed: 3,
 };
-
-// Save progress using localStorage
-function saveProgress() {
-    const gameData = {
-        score: score,
-        level: level,
-        playerStats: player.stats,
-    };
-    localStorage.setItem('footballGame', JSON.stringify(gameData));
-}
-
-// Load progress from localStorage
-function loadProgress() {
-    const savedData = JSON.parse(localStorage.getItem('footballGame'));
-    if (savedData) {
-        score = savedData.score || 0;
-        level = savedData.level || 1;
-        player.stats = savedData.playerStats || { speed: 5, passing: 5, running: 5 };
-    }
-}
-
-// Draw the field (better design with yard lines, end zones)
-function drawField() {
-    // Green field
-    ctx.fillStyle = '#4caf50';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Field markings (yard lines)
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    for (let i = 0; i < canvas.height; i += 50) {
-        ctx.beginPath();
-        ctx.moveTo(0, i);
-        ctx.lineTo(canvas.width, i);
-        ctx.stroke();
-    }
-
-    // End zones (Add a simple design or text)
-    ctx.fillStyle = 'blue';
-    ctx.font = '30px Arial';
-    ctx.fillText('END ZONE', 30, 40);
-    ctx.fillText('END ZONE', canvas.width - 150, 40);
-}
 
 // Update the game state
 function updateGame() {
@@ -169,84 +114,123 @@ function updateGame() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw field with new design
+    // Draw field (with updated design)
     drawField();
 
-    // Draw player with sprite image
-    ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+    // Move players
+    movePlayerAlongRoute(quarterback);
+    movePlayerAlongRoute(receiver);
+    moveDefender();
 
-    // Draw opponent
-    ctx.fillStyle = opponent.color;
-    ctx.fillRect(opponent.x, opponent.y, opponent.width, opponent.height);
+    // Draw quarterback
+    ctx.drawImage(quarterbackImg, quarterback.x, quarterback.y, quarterback.width, quarterback.height);
 
-    // Draw ball with sprite image
-    if (!ball.isThrown) {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fillStyle = ball.color;
-        ctx.fill();
-    } else {
-        ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+    // Draw receiver
+    ctx.drawImage(receiverImg, receiver.x, receiver.y, receiver.width, receiver.height);
+
+    // Draw defender
+    ctx.drawImage(defenderImg, defender.x, defender.y, defender.width, defender.height);
+
+    // Draw ball if thrown
+    if (ball.isThrown) {
+        ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius * 2, ball.radius * 2);
     }
 
-    // Update opponent AI
-    opponentAI();
+    // Ball logic (move toward target)
+    if (ball.isThrown) {
+        let dx = ball.targetX - ball.x;
+        let dy = ball.targetY - ball.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Check for scoring
-    if (player.x + player.width >= canvas.width) {
-        score += 1;
-        level += 1;
-        resetGame();
-        updateUI();
+        if (distance > 1) {
+            let speed = 10; // Speed of ball throw
+            let angle = Math.atan2(dy, dx);
+            ball.x += Math.cos(angle) * speed;
+            ball.y += Math.sin(angle) * speed;
+        } else {
+            // Ball reaches target
+            if (Math.abs(ball.targetX - receiver.x) < receiver.width / 2 &&
+                Math.abs(ball.targetY - receiver.y) < receiver.height / 2) {
+                console.log("Caught!");
+                // Switch to controlling receiver after catch
+                quarterback.hasBall = false;
+                receiver.hasBall = true;
+            }
+        }
     }
 
-    // Display score and level
+    // Update score and level
     updateUI();
 
     // Game loop
     requestAnimationFrame(updateGame);
 }
 
-// Reset the game after scoring
-function resetGame() {
-    player.x = 100;
-    player.y = 300;
-    ball.x = player.x + 15;
-    ball.y = player.y + 15;
-    player.hasBall = true;
+// Draw the field (with yard lines)
+function drawField() {
+    ctx.fillStyle = '#4caf50';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (level % 5 === 0) {
-        opponent.speed += 1;
-        opponent.stats.speed += 1;
+    // Draw yard lines
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < canvas.height; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
     }
 }
 
-// Opponent AI logic
-function opponentAI() {
-    if (opponent.y < player.y) opponent.y += opponent.stats.speed;
-    if (opponent.y > player.y) opponent.y -= opponent.stats.speed;
+// Move player along their route (based on route points)
+function movePlayerAlongRoute(playerObj) {
+    if (playerObj.route.length > 0) {
+        let target = playerObj.route[playerObj.routeIndex];
+        let dx = target.x - playerObj.x;
+        let dy = target.y - playerObj.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 2) {
+            let angle = Math.atan2(dy, dx);
+            playerObj.x += Math.cos(angle) * playerObj.speed;
+            playerObj.y += Math.sin(angle) * playerObj.speed;
+        } else {
+            playerObj.routeIndex++;
+            if (playerObj.routeIndex >= playerObj.route.length) {
+                playerObj.routeIndex = 0; // Reset to start of route
+            }
+        }
+    }
 }
 
-// Handle player input (movement and passing)
+// Move defender to challenge the quarterback
+function moveDefender() {
+    let dx = quarterback.x - defender.x;
+    let dy = quarterback.y - defender.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > 1) {
+        let angle = Math.atan2(dy, dx);
+        defender.x += Math.cos(angle) * defender.speed;
+        defender.y += Math.sin(angle) * defender.speed;
+    }
+}
+
+// Handle player input (movement and throwing)
 function handlePlayerInput(e) {
     if (gameOver) return;
 
-    // Movement controls
-    if (e.key === 'w' && player.y > 0) player.y -= player.stats.speed; // Up
-    if (e.key === 's' && player.y + player.height < canvas.height) player.y += player.stats.speed; // Down
-    if (e.key === 'a' && player.x > 0) player.x -= player.stats.speed; // Left
-    if (e.key === 'd' && player.x + player.width < canvas.width) player.x += player.stats.speed; // Right
-
-    // Pass the ball
-    if (e.key === ' ' && player.hasBall) {
+    // Throw the ball (triggered by spacebar)
+    if (e.key === ' ' && quarterback.hasBall) {
+        // Throw ball to receiver's current position
         ball.isThrown = true;
-        ball.x = player.x + player.width + 15;
-        ball.y = player.y + 15;
-        player.hasBall = false;
+        ball.targetX = receiver.x + 15;
+        ball.targetY = receiver.y + 15;
+        console.log('Ball thrown to target');
     }
 }
 
-// Update the UI (score, level, and team stats)
+// Update the UI (score and level)
 function updateUI() {
     document.getElementById('score').textContent = 'Score: ' + score;
     document.getElementById('level').textContent = 'Level: ' + level;
@@ -255,39 +239,7 @@ function updateUI() {
 // Event listener for keyboard input
 window.addEventListener('keydown', handlePlayerInput);
 
-// Upgrade system
-document.getElementById('upgrade-speed').addEventListener('click', () => {
-    if (score >= team.upgrades.speed) {
-        player.stats.speed += 1;
-        score -= team.upgrades.speed;
-        team.upgrades.speed *= 2;  // Increase cost for next upgrade
-        updateUI();
-        saveProgress();
-    }
-});
-
-document.getElementById('upgrade-passing').addEventListener('click', () => {
-    if (score >= team.upgrades.passing) {
-        player.stats.passing += 1;
-        score -= team.upgrades.passing;
-        team.upgrades.passing *= 2;  // Increase cost for next upgrade
-        updateUI();
-        saveProgress();
-    }
-});
-
-document.getElementById('upgrade-running').addEventListener('click', () => {
-    if (score >= team.upgrades.running) {
-        player.stats.running += 1;
-        score -= team.upgrades.running;
-        team.upgrades.running *= 2;  // Increase cost for next upgrade
-        updateUI();
-        saveProgress();
-    }
-});
-
 // Start the game
-loadProgress();
 updateGame();
 
 </script>
