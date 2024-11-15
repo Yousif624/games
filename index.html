@@ -56,7 +56,6 @@
 <div class="game-ui">
     <div id="score">Score: 0</div>
     <div id="level">Level: 1</div>
-    <div id="team-status"></div>
     <div id="game-over" class="game-over" style="display:none;">Game Over!</div>
     <div id="upgrade-panel" style="display:none;">
         <button class="upgrade-button" id="upgrade-speed">Upgrade Speed</button>
@@ -72,6 +71,14 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
+// Load player image
+const playerImg = new Image();
+playerImg.src = 'https://example.com/player_sprite.png'; // Replace with actual sprite image URL
+
+// Load ball image
+const ballImg = new Image();
+ballImg.src = 'https://example.com/football_sprite.png'; // Replace with actual ball image URL
+
 // Game objects
 let player = {
     x: 100,
@@ -79,7 +86,6 @@ let player = {
     width: 30,
     height: 30,
     speed: 5,
-    color: 'blue',
     hasBall: true,
     stats: { speed: 5, passing: 5, running: 5 },
 };
@@ -133,6 +139,29 @@ function loadProgress() {
     }
 }
 
+// Draw the field (better design with yard lines, end zones)
+function drawField() {
+    // Green field
+    ctx.fillStyle = '#4caf50';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Field markings (yard lines)
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < canvas.height; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+    }
+
+    // End zones (Add a simple design or text)
+    ctx.fillStyle = 'blue';
+    ctx.font = '30px Arial';
+    ctx.fillText('END ZONE', 30, 40);
+    ctx.fillText('END ZONE', canvas.width - 150, 40);
+}
+
 // Update the game state
 function updateGame() {
     if (gameOver) return;
@@ -140,23 +169,25 @@ function updateGame() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw field
-    ctx.fillStyle = '#4caf50';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Draw field with new design
+    drawField();
 
-    // Draw player
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    // Draw player with sprite image
+    ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
     // Draw opponent
     ctx.fillStyle = opponent.color;
     ctx.fillRect(opponent.x, opponent.y, opponent.width, opponent.height);
 
-    // Draw ball
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = ball.color;
-    ctx.fill();
+    // Draw ball with sprite image
+    if (!ball.isThrown) {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
+    } else {
+        ctx.drawImage(ballImg, ball.x, ball.y, ball.radius * 2, ball.radius * 2);
+    }
 
     // Update opponent AI
     opponentAI();
@@ -219,34 +250,10 @@ function handlePlayerInput(e) {
 function updateUI() {
     document.getElementById('score').textContent = 'Score: ' + score;
     document.getElementById('level').textContent = 'Level: ' + level;
-    document.getElementById('team-status').textContent = 'Player Speed: ' + player.stats.speed;
-}
-
-// Game Over
-function gameOverScreen() {
-    gameOver = true;
-    document.getElementById('game-over').style.display = 'block';
 }
 
 // Event listener for keyboard input
 window.addEventListener('keydown', handlePlayerInput);
-
-// Sound effects
-const soundPass = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Replace with actual sound URL
-const soundScore = new Audio('https://www.soundjay.com/button/beep-09.wav'); // Replace with actual sound URL
-
-// Play sound for passing and scoring
-function playSound(eventType) {
-    if (eventType === 'pass') soundPass.play();
-    if (eventType === 'score') soundScore.play();
-}
-
-// Event listeners for ball passing
-window.addEventListener('keydown', (e) => {
-    if (e.key === ' ' && player.hasBall) {
-        playSound('pass');
-    }
-});
 
 // Upgrade system
 document.getElementById('upgrade-speed').addEventListener('click', () => {
@@ -279,17 +286,10 @@ document.getElementById('upgrade-running').addEventListener('click', () => {
     }
 });
 
-// Show upgrade panel if score allows
-function showUpgradePanel() {
-    if (score > 0) {
-        document.getElementById('upgrade-panel').style.display = 'block';
-    }
-}
-
-// Start the game loop
+// Start the game
 loadProgress();
 updateGame();
-showUpgradePanel();
+
 </script>
 
 </body>
