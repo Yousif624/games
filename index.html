@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Game</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #4caf50; /* Football field green */
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .game-ui {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            z-index: 100;
+        }
+
+        .game-over {
+            color: red;
+            font-size: 30px;
+        }
+
+        .upgrade-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .upgrade-button:hover {
+            background-color: #e64a19;
+        }
+
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<div class="game-ui">
+    <div id="score">Score: 0</div>
+    <div id="level">Level: 1</div>
+    <div id="team-status"></div>
+    <div id="game-over" class="game-over" style="display:none;">Game Over!</div>
+    <div id="upgrade-panel" style="display:none;">
+        <button class="upgrade-button" id="upgrade-speed">Upgrade Speed</button>
+        <button class="upgrade-button" id="upgrade-passing">Upgrade Passing</button>
+        <button class="upgrade-button" id="upgrade-running">Upgrade Running</button>
+    </div>
+</div>
+
+<script>
+// Game Initialization
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 800;
+canvas.height = 600;
+
+// Game objects
+let player = {
+    x: 100,
+    y: 300,
+    width: 30,
+    height: 30,
+    speed: 5,
+    color: 'blue',
+    hasBall: true,
+    stats: { speed: 5, passing: 5, running: 5 },
+};
+
+let opponent = {
+    x: 600,
+    y: 300,
+    width: 30,
+    height: 30,
+    speed: 4,
+    color: 'red',
+    stats: { speed: 4, defense: 4 },
+};
+
+let ball = {
+    x: player.x + 15,
+    y: player.y + 15,
+    radius: 10,
+    color: 'yellow',
+    isThrown: false,
+};
+
+// Game variables
+let score = 0;
+let level = 1;
+let gameOver = false;
+
+// Team Management Variables
+let team = {
+    players: [{ name: 'Player 1', speed: 5, passing: 5, running: 5 }],
+    upgrades: { speed: 10, passing: 10, running: 10 },
+};
+
+// Save progress using localStorage
+function saveProgress() {
+    const gameData = {
+        score: score,
+        level: level,
+        playerStats: player.stats,
+    };
+    localStorage.setItem('footballGame', JSON.stringify(gameData));
+}
+
+// Load progress from localStorage
+function loadProgress() {
+    const savedData = JSON.parse(localStorage.getItem('footballGame'));
+    if (savedData) {
+        score = savedData.score || 0;
+        level = savedData.level || 1;
+        player.stats = savedData.playerStats || { speed: 5, passing: 5, running: 5 };
+    }
+}
+
+// Update the game state
+function updateGame() {
+    if (gameOver) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw field
+    ctx.fillStyle = '#4caf50';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw player
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Draw opponent
+    ctx.fillStyle = opponent.color;
+    ctx.fillRect(opponent.x, opponent.y, opponent.width, opponent.height);
+
+    // Draw ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = ball.color;
+    ctx.fill();
+
+    // Update opponent AI
+    opponentAI();
+
+    // Check for scoring
+    if (player.x + player.width >= canvas.width) {
+        score += 1;
+        level += 1;
+        resetGame();
+        updateUI();
+    }
+
+    // Display score and level
+    updateUI();
+
+    // Game loop
+    requestAnimationFrame(updateGame);
+}
+
+// Reset the game after scoring
+function resetGame() {
+    player.x = 100;
+    player.y = 300;
+    ball.x = player.x + 15;
+    ball.y = player.y + 15;
+    player.hasBall = true;
+
+    if (level % 5 === 0) {
+        opponent.speed += 1;
+        opponent.stats.speed += 1;
+    }
+}
+
+// Opponent AI logic
+function opponentAI() {
+    if (opponent.y < player.y) opponent.y += opponent.stats.speed;
+    if (opponent.y > player.y) opponent.y -= opponent.stats.speed;
+}
+
+// Handle player input (movement and passing)
+function handlePlayerInput(e) {
+    if (gameOver) return;
+
+    // Movement controls
+    if (e.key === 'w' && player.y > 0) player.y -= player.stats.speed; // Up
+    if (e.key === 's' && player.y + player.height < canvas.height) player.y += player.stats.speed; // Down
+    if (e.key === 'a' && player.x > 0) player.x -= player.stats.speed; // Left
+    if (e.key === 'd' && player.x + player.width < canvas.width) player.x += player.stats.speed; // Right
+
+    // Pass the ball
+    if (e.key === ' ' && player.hasBall) {
+        ball.isThrown = true;
+        ball.x = player.x + player.width + 15;
+        ball.y = player.y + 15;
+        player.hasBall = false;
+    }
+}
+
+// Update the UI (score, level, and team stats)
+function updateUI() {
+    document.getElementById('score').textContent = 'Score: ' + score;
+    document.getElementById('level').textContent = 'Level: ' + level;
+    document.getElementById('team-status').textContent = 'Player Speed: ' + player.stats.speed;
+}
+
+// Game Over
+function gameOverScreen() {
+    gameOver = true;
+    document.getElementById('game-over').style.display = 'block';
+}
+
+// Event listener for keyboard input
+window.addEventListener('keydown', handlePlayerInput);
+
+// Sound effects
+const soundPass = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Replace with actual sound URL
+const soundScore = new Audio('https://www.soundjay.com/button/beep-09.wav'); // Replace with actual sound URL
+
+// Play sound for passing and scoring
+function playSound(eventType) {
+    if (eventType === 'pass') soundPass.play();
+    if (eventType === 'score') soundScore.play();
+}
+
+// Event listeners for ball passing
+window.addEventListener('keydown', (e) => {
+    if (e.key === ' ' && player.hasBall) {
+        playSound('pass');
+    }
+});
+
+// Upgrade system
+document.getElementById('upgrade-speed').addEventListener('click', () => {
+    if (score >= team.upgrades.speed) {
+        player.stats.speed += 1;
+        score -= team.upgrades.speed;
+        team.upgrades.speed *= 2;  // Increase cost for next upgrade
+        updateUI();
+        saveProgress();
+    }
+});
+
+document.getElementById('upgrade-passing').addEventListener('click', () => {
+    if (score >= team.upgrades.passing) {
+        player.stats.passing += 1;
+        score -= team.upgrades.passing;
+        team.upgrades.passing *= 2;  // Increase cost for next upgrade
+        updateUI();
+        saveProgress();
+    }
+});
+
+document.getElementById('upgrade-running').addEventListener('click', () => {
+    if (score >= team.upgrades.running) {
+        player.stats.running += 1;
+        score -= team.upgrades.running;
+        team.upgrades.running *= 2;  // Increase cost for next upgrade
+        updateUI();
+        saveProgress();
+    }
+});
+
+// Show upgrade panel if score allows
+function showUpgradePanel() {
+    if (score > 0) {
+        document.getElementById('upgrade-panel').style.display = 'block';
+    }
+}
+
+// Start the game loop
+loadProgress();
+updateGame();
+showUpgradePanel();
+</script>
+
+</body>
+</html>
